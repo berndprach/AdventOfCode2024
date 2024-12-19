@@ -1,45 +1,34 @@
-from part1 import parse_input, read_input, Machine
+from time import sleep
 
-C = 10000000000000
-
-
-def find_cheapest_combination(m: Machine):
-    """
-    alpha a[0] + beta b[0] = goal[0]
-    alpha a[1] + beta b[1] = goal[1]
-    => beta b[0] a[1] - beta b[1] a[0] = goal[0] a[1] - goal[1] a[0]
-    => beta = (goal[0] a[1] - goal[1] a[0]) / (b[0] a[1] - b[1] a[0])
-    """
-
-    denominator = m.b[0] * m.a[1] - m.b[1] * m.a[0]
-    if denominator == 0:
-        raise ValueError("This will require some more work!")
-
-    beta = (m.goal[0] * m.a[1] - m.goal[1] * m.a[0]) // denominator
-    alpha = (m.goal[0] - beta * m.b[0]) // m.a[0]
-    x_matches = (alpha * m.a[0] + beta * m.b[0] == m.goal[0])
-    y_matches = (alpha * m.a[1] + beta * m.b[1] == m.goal[1])
-
-    if x_matches and y_matches:
-        return 3 * alpha + 1 * beta
-    else:
-        return None
+from part1 import parse_input, read_input
 
 
 def solve(lines: list[str]) -> int:
-    machines = parse_input(lines)
-    for i in range(len(machines)):
-        m = machines[i]
-        new_goal = (m.goal[0] + C, m.goal[1] + C)
-        machines[i] = Machine(m.a, m.b, new_goal)
+    robots = parse_input(lines)
 
-    solution = 0
-    for m in machines:
-        cc = find_cheapest_combination(m)
-        if cc is not None:
-            solution += cc
+    for i in range(10000):
+        # sleep(0.01)
+        # print(f"\nStep {i}:")
 
-    return solution
+        x_values = [(r.p[0] + i * r.v[0]) % 101 for r in robots]
+        y_values = [(r.p[1] + i * r.v[1]) % 103 for r in robots]
+
+        positions = set(zip(x_values, y_values))
+        nb_count = 0
+        for x, y in positions:
+            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                if (x+dx, y+dy) in positions:
+                    nb_count += 1
+
+        if nb_count > 1000:
+            print(f"\nStep {i}:")
+            for y in range(103):
+                row = []
+                for x in range(101):
+                    row.append("#" if (x, y) in positions else ".")
+                print("".join(row))
+            sleep(2)
+            return i
 
 
 def main():

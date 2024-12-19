@@ -9,56 +9,38 @@ def read_input() -> list[str]:
 
 
 def integers_in(line: str) -> list[int]:
-    return [int(x) for x in re.findall(r"\d+", line)]
+    return [int(x) for x in re.findall(r"-?\d+", line)]
 
 
-class Machine(NamedTuple):
-    a: tuple[int, int]
-    b: tuple[int, int]
-    goal: tuple[int, int]
+class Robot(NamedTuple):
+    p: tuple[int, int]
+    v: tuple[int, int]
 
 
 def parse_input(lines: list[str]):
-    line = iter(lines)
-    machines = []
-    while True:
-        try:
-            a_move = tuple(integers_in(next(line)))
-            b_move = tuple(integers_in(next(line)))
-            goal = tuple(integers_in(next(line)))
-            machines.append(Machine(a_move, b_move, goal))
-            next(line)
-        except StopIteration:
-            break
-    return machines
+    robots = []
+    for line in lines:
+        p0, p1, v0, v1 = integers_in(line)
+        robots.append(Robot((p0, p1), (v0, v1)))
+    return robots
 
 
-def find_cheapest_combination(m: Machine):
-    a_presses = 0
-    a_position = (0, 0)
-    best_solution = None
-    while a_position[0] < m.goal[0] and a_position[1] < m.goal[1]:
-        b_presses = (m.goal[0] - a_position[0]) // m.b[0]
-        x_matches = (a_position[0] + b_presses * m.b[0] == m.goal[0])
-        y_matches = (a_position[1] + b_presses * m.b[1] == m.goal[1])
-        if x_matches and y_matches:
-            cost = 3 * a_presses + 1 * b_presses
-            if best_solution is None or cost < best_solution:
-                best_solution = cost
-        a_presses += 1
-        a_position = (a_presses * m.a[0], a_presses * m.a[1])
-    return best_solution
+def solve(lines: list[str], w=101, h=103) -> int:
+    robots = parse_input(lines)
+    print(robots)
 
+    q_counts = {(b1, b2): 0 for b1 in [0, 1] for b2 in [0, 1]}
+    for r in robots:
+        final_x = (r.p[0] + 100 * r.v[0]) % w
+        final_y = (r.p[1] + 100 * r.v[1]) % h
+        if final_x == w // 2 or final_y == h // 2:
+            continue
+        q_counts[(final_x < w // 2, final_y < h // 2)] += 1
+    print(q_counts)
 
-def solve(lines: list[str]) -> int:
-    machines = parse_input(lines)
-    solution = 0
-    for m in machines:
-        print(m)
-        cc = find_cheapest_combination(m)
-        if cc is not None:
-            solution += cc
-
+    solution = 1
+    for count in q_counts.values():
+        solution *= count
     return solution
 
 

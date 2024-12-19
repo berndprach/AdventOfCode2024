@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from part1 import solve, parse_input
+from part1 import solve
 
-GOAL_SOLUTION = 480
+GOAL_SOLUTION = 12
 
 
 def read_test_lines():
@@ -12,22 +12,12 @@ def read_test_lines():
     return lines
 
 
-def test_parsing():
-    lines = read_test_lines()
-    machines = parse_input(lines)
-    assert len(machines) == 4
-    assert machines[0].a == (94, 34)
-    assert machines[0].b == (22, 67)
-    assert machines[0].goal == (8400, 5400)
-
-
 def test_solve():
     lines = read_test_lines()
-    solution = solve(lines)
+    solution = solve(lines, 11, 7)
     print(f"Solution: {solution}")
     assert solution == GOAL_SOLUTION
 
 
 if __name__ == "__main__":
-    test_parsing()
     test_solve()
